@@ -23,16 +23,38 @@ final class Request
         $path = rtrim($uri, '/') ?: '/';
 
         $headers = [];
-        foreach ($_SERVER as $key => $value) {
-            if (str_starts_with($key, 'HTTP_')) {
-                $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($key, 5)))));
-                $headers[$name] = $value;
-            }
-        }
 
-        if (isset($_SERVER['CONTENT_TYPE'])) {
-            $headers['Content-Type'] = $_SERVER['CONTENT_TYPE'];
-        }
+if (function_exists('getallheaders')) {
+    foreach (getallheaders() as $name => $value) {
+        $normalizedName = str_replace(
+            ' ',
+            '-',
+            ucwords(strtolower(str_replace('-', ' ', $name)))
+        );
+
+        $headers[$normalizedName] = $value;
+    }
+}
+
+foreach ($_SERVER as $key => $value) {
+    if (str_starts_with($key, 'HTTP_')) {
+        $name = str_replace(
+            ' ',
+            '-',
+            ucwords(strtolower(str_replace('_', ' ', substr($key, 5))))
+        );
+
+        $headers[$name] = $value;
+    }
+}
+
+if (isset($_SERVER['CONTENT_TYPE'])) {
+    $headers['Content-Type'] = $_SERVER['CONTENT_TYPE'];
+}
+
+if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $headers['Authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+}
 
         $rawBody = file_get_contents('php://input') ?: '';
         $body = [];
