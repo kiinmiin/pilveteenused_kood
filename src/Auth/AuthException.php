@@ -11,7 +11,7 @@ final class AuthException extends Exception
     public function __construct(
         public readonly string $errorCode,
         string $message,
-        public readonly int httpStatus,
+        public readonly int $httpStatus,
     ) {
         parent::__construct($message);
     }
